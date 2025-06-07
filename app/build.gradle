@@ -1,0 +1,29 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.telegram:telegrambots:6.9.7.0'
+    implementation 'org.quartz-scheduler:quartz:2.5.0'
+
+    // kino nowe job
+    implementation 'org.jsoup:jsoup:1.17.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'yehor.myinbox.Starter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

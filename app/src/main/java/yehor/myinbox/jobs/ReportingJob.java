@@ -8,7 +8,7 @@ public abstract class ReportingJob implements Job {
   @Override
   public void execute(JobExecutionContext context) {
     try {
-      var result = task().run();
+      String result = task().run();
       if (task().condition().shouldReport()) {
         reporter().sendReport(result);
       }

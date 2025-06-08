@@ -1,6 +1,7 @@
 package yehor.myinbox.telegram;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -15,6 +16,7 @@ public class MyInboxTelegramBot extends TelegramLongPollingBot {
     SendMessage message = new SendMessage();
     message.setChatId(MY_INBOX_TELEGRAM_BOT_CHAT_ID);
     message.setText(text);
+    message.setParseMode(ParseMode.HTML);
     try {
       execute(message);
     } catch (TelegramApiException e) {

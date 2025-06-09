@@ -1,4 +1,4 @@
-package yehor.myinbox.http;
+package yehor.myinbox.helpers;
 
 import java.io.IOException;
 import java.net.URI;

@@ -5,12 +5,17 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import yehor.myinbox.helpers.EnvVarHelper;
 
 public class MyInboxTelegramBot extends TelegramLongPollingBot {
 
-  // temp hardcoded values:
-  private String MY_INBOX_TELEGRAM_BOT_CHAT_ID = "";
-  private final String MY_INBOX_TELEGRAM_BOT_TOKEN = "";
+  private final String MY_INBOX_TELEGRAM_BOT_CHAT_ID;
+  private final String MY_INBOX_TELEGRAM_BOT_TOKEN;
+
+  public MyInboxTelegramBot() {
+    MY_INBOX_TELEGRAM_BOT_CHAT_ID = EnvVarHelper.get("MY_INBOX_TELEGRAM_BOT_CHAT_ID");
+    MY_INBOX_TELEGRAM_BOT_TOKEN = EnvVarHelper.get("MY_INBOX_TELEGRAM_BOT_TOKEN");
+  }
 
   public void sendMessage(String text) {
     SendMessage message = new SendMessage();

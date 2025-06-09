@@ -12,7 +12,7 @@ public abstract class ReportingJob implements Job {
       if (task().condition().shouldReport()) {
         reporter().sendReport(result);
       } else {
-        System.out.printf("No report sent for %s, condition not met.",
+        System.out.printf("No report sent for %s, condition not met.\n",
             task().getClass().getSimpleName());
       }
     } catch (Exception e) {

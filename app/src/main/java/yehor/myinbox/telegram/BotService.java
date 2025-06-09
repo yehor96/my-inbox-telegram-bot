@@ -14,7 +14,7 @@ public class BotService implements Reporter {
       TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
       botsApi.registerBot(myInboxTelegramBot);
     } catch (Exception e) {
-      System.out.println("Failed to start the bot: " + e.getMessage());
+      throw new RuntimeException("Failed to start the bot, not able to continue.", e);
     }
   }
 

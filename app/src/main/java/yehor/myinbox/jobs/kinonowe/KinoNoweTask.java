@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.jsoup.Jsoup;
-import yehor.myinbox.http.HttpClientHelper;
+import yehor.myinbox.helpers.HttpClientHelper;
 import yehor.myinbox.jobs.ReportingCondition;
 import yehor.myinbox.jobs.ReportingTask;
 

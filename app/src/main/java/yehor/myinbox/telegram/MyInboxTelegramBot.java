@@ -17,6 +17,7 @@ public class MyInboxTelegramBot extends TelegramLongPollingBot {
     message.setChatId(MY_INBOX_TELEGRAM_BOT_CHAT_ID);
     message.setText(text);
     message.setParseMode(ParseMode.HTML);
+    message.disableWebPagePreview();
     try {
       execute(message);
     } catch (TelegramApiException e) {

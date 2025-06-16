@@ -1,9 +1,9 @@
 package yehor.myinbox.jobs.kinonowe;
 
 import static java.util.stream.Collectors.toCollection;
+import static yehor.myinbox.jobs.kinonowe.KinoNoweItem.MAIN_ELEMENT_SELECTOR;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import org.jsoup.Jsoup;
 import yehor.myinbox.helpers.HttpClientHelper;
@@ -15,13 +15,6 @@ public class KinoNoweTask implements ReportingTask {
 
   private static final String BASE_URL = "https://www.kinonh.pl";
   private static final String MOVIE_LIST_URL = BASE_URL.concat("/list.s?typ=ENGLISH_FRIENDLY");
-  private static final String MAIN_ELEMENTS_SELECTOR = ".film-box .opis";
-  private static final List<String> SKIP_LABELS = List.of(
-      "dubbing",
-      "transmisja na żywo",
-      "retransmisja",
-      "lektor na żywo"
-  );
   private static final String RESPONSE_FORMAT =
       """
       🎬🟣 %d new movies found in 'Kino Nowe Horyzonty':
@@ -51,20 +44,16 @@ public class KinoNoweTask implements ReportingTask {
     String response = HttpClientHelper.doGet(MOVIE_LIST_URL);
 
     Set<KinoNoweItem> items = Jsoup.parse(response)
-        .select(MAIN_ELEMENTS_SELECTOR).stream()
+        .select(MAIN_ELEMENT_SELECTOR).stream()
         .map(KinoNoweItem::fromElement)
-        .filter(item -> item.labels().stream().noneMatch(SKIP_LABELS::contains))
+        .filter(item -> !item.hasSkipLabel() && item.isScreeningAvailable())
         .collect(toCollection(LinkedHashSet::new));
 
     Set<KinoNoweItem> newItems = excludePreviousItems(items);
     reportingCondition = () -> !newItems.isEmpty();
 
     Set<KinoNoweItem> translatedItems = newItems.stream()
-        .map(item -> new KinoNoweItem(
-            translatorService.translate(item.title()),
-            item.director(),
-            item.link(),
-            item.labels()))
+        .map(item -> item.replaceTitle(translatorService::translate))
         .collect(toCollection(LinkedHashSet::new));
 
     logTranslationBilling();

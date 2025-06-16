@@ -24,9 +24,10 @@ public class KinoNoweTask implements ReportingTask {
   );
   private static final String RESPONSE_FORMAT =
       """
-      🎬 %d new movies found in 'Kino Nowe Horyzonty':
+      🎬🟣 %d new movies found in 'Kino Nowe Horyzonty':
 
       %s
+
 
       See all available at the <a href="%s">site</a>.
       """;
@@ -61,6 +62,7 @@ public class KinoNoweTask implements ReportingTask {
     Set<KinoNoweItem> translatedItems = newItems.stream()
         .map(item -> new KinoNoweItem(
             translatorService.translate(item.title()),
+            item.director(),
             item.link(),
             item.labels()))
         .collect(toCollection(LinkedHashSet::new));
@@ -88,7 +90,7 @@ public class KinoNoweTask implements ReportingTask {
   private String buildResponse(Set<KinoNoweItem> items) {
     String moviesResponse = items.stream()
         .map(item -> item.buildString(BASE_URL))
-        .reduce((a, b) -> a + "\n" + b)
+        .reduce((a, b) -> a + "\n\n" + b)
         .orElse("---");
     return RESPONSE_FORMAT.formatted(items.size(), moviesResponse, MOVIE_LIST_URL);
   }

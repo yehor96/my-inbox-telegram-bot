@@ -9,7 +9,7 @@ public abstract class ReportingJob implements Job {
   public void execute(JobExecutionContext context) {
     try {
       String result = task().run();
-      if (task().condition().shouldReport()) {
+      if (task().reportingCondition().isMet()) {
         reporter().sendReport(result);
       } else {
         System.out.printf("No report sent for %s, condition not met.\n",

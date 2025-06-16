@@ -13,6 +13,7 @@ dependencies {
 
     // kino nowe job
     implementation 'org.jsoup:jsoup:1.17.2'
+    implementation "com.deepl.api:deepl-java:1.10.0"
 }
 
 java {

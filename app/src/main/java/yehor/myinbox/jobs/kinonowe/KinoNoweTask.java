@@ -9,6 +9,7 @@ import org.jsoup.Jsoup;
 import yehor.myinbox.helpers.HttpClientHelper;
 import yehor.myinbox.jobs.ReportingCondition;
 import yehor.myinbox.jobs.ReportingTask;
+import yehor.myinbox.translation.ExternalTranslatorService;
 
 public class KinoNoweTask implements ReportingTask {
 
@@ -30,11 +31,17 @@ public class KinoNoweTask implements ReportingTask {
       See all available at the <a href="%s">site</a>.
       """;
 
+  private final ExternalTranslatorService translatorService;
+
   private Set<KinoNoweItem> previousItems = new LinkedHashSet<>();
   private ReportingCondition reportingCondition = () -> false;
 
+  public KinoNoweTask(ExternalTranslatorService translatorService) {
+    this.translatorService = translatorService;
+  }
+
   @Override
-  public ReportingCondition condition() {
+  public ReportingCondition reportingCondition() {
     return reportingCondition;
   }
 
@@ -50,7 +57,23 @@ public class KinoNoweTask implements ReportingTask {
 
     Set<KinoNoweItem> newItems = excludePreviousItems(items);
     reportingCondition = () -> !newItems.isEmpty();
-    return buildResponse(newItems);
+
+    Set<KinoNoweItem> translatedItems = newItems.stream()
+        .map(item -> new KinoNoweItem(
+            translatorService.translate(item.title()),
+            item.link(),
+            item.labels()))
+        .collect(toCollection(LinkedHashSet::new));
+
+    logTranslationBilling();
+    return buildResponse(translatedItems);
+  }
+
+  private void logTranslationBilling() {
+    if (reportingCondition.isMet()) {
+      String billingInfo = translatorService.billingInfo();
+      System.out.println(billingInfo);
+    }
   }
 
   private Set<KinoNoweItem> excludePreviousItems(Set<KinoNoweItem> items) {

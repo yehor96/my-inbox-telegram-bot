@@ -16,7 +16,7 @@ public class KinoNoweJob extends ReportingJob {
 
   @Override
   public String schedule() {
-    return "0 * * * * ?"; // Every 1 minute
+    return "0 0 19 * * ?"; // Every day at 7 pm
   }
 
   @Override

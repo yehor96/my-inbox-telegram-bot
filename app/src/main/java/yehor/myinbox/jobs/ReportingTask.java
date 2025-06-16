@@ -2,7 +2,7 @@ package yehor.myinbox.jobs;
 
 public interface ReportingTask {
 
-  ReportingCondition condition();
+  ReportingCondition reportingCondition();
 
   String run();
 }

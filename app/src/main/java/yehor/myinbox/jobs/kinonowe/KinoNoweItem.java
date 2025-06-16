@@ -22,7 +22,11 @@ public record KinoNoweItem (String title, String link, List<String> labels) {
   }
 
   public String buildString(String baseLink) {
-    return "%s (<a href=\"%s\">link</a>)".formatted(title, baseLink.concat(link));
+    return "- %s (<a href=\"%s\">link</a>)".formatted(title, baseLink.concat(link));
+  }
+
+  public String title() {
+    return title;
   }
 
   @Override

@@ -10,6 +10,7 @@ public abstract class ReportingJob implements Job {
     try {
       String result = task().run();
       if (task().reportingCondition().isMet()) {
+        System.out.printf("Sending report for %s\n", task().getClass().getSimpleName());
         reporter().sendReport(result);
       } else {
         System.out.printf("No report sent for %s, condition not met.\n",

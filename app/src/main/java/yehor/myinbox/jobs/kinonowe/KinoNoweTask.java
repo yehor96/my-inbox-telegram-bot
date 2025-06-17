@@ -7,12 +7,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import org.jsoup.Jsoup;
 import yehor.myinbox.helpers.HttpClientHelper;
+import yehor.myinbox.helpers.ObjectFileHelper;
 import yehor.myinbox.jobs.ReportingCondition;
 import yehor.myinbox.jobs.ReportingTask;
 import yehor.myinbox.translation.ExternalTranslatorService;
 
 public class KinoNoweTask implements ReportingTask {
 
+  private static final String PREVIOUS_ITEMS_FILE = "data/kino_nowe_previous_items.json";
   private static final String BASE_URL = "https://www.kinonh.pl";
   private static final String MOVIE_LIST_URL = BASE_URL.concat("/list.s?typ=ENGLISH_FRIENDLY");
   private static final String RESPONSE_FORMAT =
@@ -27,7 +29,6 @@ public class KinoNoweTask implements ReportingTask {
 
   private final ExternalTranslatorService translatorService;
 
-  private Set<KinoNoweItem> previousItems = new LinkedHashSet<>();
   private ReportingCondition reportingCondition = () -> false;
 
   public KinoNoweTask(ExternalTranslatorService translatorService) {
@@ -68,17 +69,21 @@ public class KinoNoweTask implements ReportingTask {
   }
 
   private Set<KinoNoweItem> excludePreviousItems(Set<KinoNoweItem> items) {
+    final Set<KinoNoweItem> previousItems = new LinkedHashSet<>(
+        ObjectFileHelper.readObjectsFromFile(PREVIOUS_ITEMS_FILE, KinoNoweItem.class));
+
     Set<KinoNoweItem> newItems = items.stream()
         .filter(item -> !previousItems.contains(item))
         .collect(toCollection(LinkedHashSet::new));
 
-    previousItems = items;
+    ObjectFileHelper.writeObjectsToFile(items.stream().toList(), PREVIOUS_ITEMS_FILE);
+
     return newItems;
   }
 
   private String buildResponse(Set<KinoNoweItem> items) {
     String moviesResponse = items.stream()
-        .map(item -> item.buildString(BASE_URL))
+        .map(item -> item.buildDisplayString(BASE_URL))
         .reduce((a, b) -> a + "\n\n" + b)
         .orElse("---");
     return RESPONSE_FORMAT.formatted(items.size(), moviesResponse, MOVIE_LIST_URL);

@@ -5,11 +5,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import org.jsoup.nodes.Element;
 
-public record KinoNoweItem (String title,
-                            String director,
-                            String link,
-                            boolean isScreeningAvailable,
-                            List<String> labels) {
+public class KinoNoweItem {
 
   public static final String MAIN_ELEMENT_SELECTOR = ".film-box .opis";
   private static final String MOVIE_TITLE_SELECTOR = "h4 a";
@@ -23,6 +19,24 @@ public record KinoNoweItem (String title,
       "retransmisja",
       "lektor na żywo"
   );
+
+  private String title;
+  private String director;
+  private String link;
+  private boolean isScreeningAvailable;
+  private List<String> labels;
+
+  public KinoNoweItem() {
+  }
+
+  public KinoNoweItem(String title, String director, String link,
+      boolean isScreeningAvailable, List<String> labels) {
+    this.title = title;
+    this.director = director;
+    this.link = link;
+    this.isScreeningAvailable = isScreeningAvailable;
+    this.labels = labels;
+  }
 
   public static KinoNoweItem fromElement(Element element) {
     var movieElement = element.select(MOVIE_TITLE_SELECTOR);
@@ -38,7 +52,7 @@ public record KinoNoweItem (String title,
     return new KinoNoweItem(movieTitle, movieDirector, movieLink, isScreeningAvailable, labels);
   }
 
-  public String buildString(String baseLink) {
+  public String buildDisplayString(String baseLink) {
     String directorToDisplay = (Objects.nonNull(director) && !director.isBlank())
         ? ", dir. %s".formatted(director)
         : "";
@@ -49,12 +63,8 @@ public record KinoNoweItem (String title,
   }
 
   public KinoNoweItem replaceTitle(Function<String, String> titleReplacer) {
-    return new KinoNoweItem(
-        titleReplacer.apply(this.title),
-        this.director,
-        this.link,
-        this.isScreeningAvailable,
-        this.labels);
+    title = titleReplacer.apply(title);
+    return this;
   }
 
   public boolean hasSkipLabel() {
@@ -73,5 +83,45 @@ public record KinoNoweItem (String title,
   @Override
   public int hashCode() {
     return title.hashCode();
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+  }
+
+  public String getDirector() {
+    return director;
+  }
+
+  public void setDirector(String director) {
+    this.director = director;
+  }
+
+  public String getLink() {
+    return link;
+  }
+
+  public void setLink(String link) {
+    this.link = link;
+  }
+
+  public boolean isScreeningAvailable() {
+    return isScreeningAvailable;
+  }
+
+  public void setScreeningAvailable(boolean screeningAvailable) {
+    isScreeningAvailable = screeningAvailable;
+  }
+
+  public List<String> getLabels() {
+    return labels;
+  }
+
+  public void setLabels(List<String> labels) {
+    this.labels = labels;
   }
 }

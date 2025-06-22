@@ -23,7 +23,7 @@ public class ObjectFileMappingHelper {
     try {
       MAPPER.writeValue(file, objects);
     } catch (IOException e) {
-      System.out.println("Unable to write objects to file: " + fileName);
+      System.out.println("Unable to write objects to file: " + fileName + " - " + e.getMessage());
     }
   }
 
@@ -38,7 +38,7 @@ public class ObjectFileMappingHelper {
     try {
       return MAPPER.readValue(file, type);
     } catch (Exception e) {
-      System.out.println("Unable to read objects from file: " + fileName);
+      System.out.println("Unable to read objects from file: " + fileName + " - " + e.getMessage());
       return Collections.emptyList();
     }
   }

@@ -1,6 +1,9 @@
 package yehor.myinbox.jobs.cinemacity;
 
+import static yehor.myinbox.jobs.cinemacity.CinemaCityLanguage.LANGUAGES_TO_INCLUDE;
+
 import java.util.Collection;
+import java.util.List;
 import yehor.myinbox.helpers.HttpClientHelper;
 import yehor.myinbox.helpers.ObjectFileMappingHelper;
 import yehor.myinbox.helpers.ObjectJsonMappingHelper;
@@ -11,10 +14,10 @@ public class CinemaCityTask implements ReportingTask {
 
   private static final String PREVIOUS_ITEMS_FILE = "data/cinema_city_previous_items.json";
   private static final String WROCLAVIA_ID = "1097";
-  private static final String MOVIE_LIST = ("https://www.cinema-city.pl/pl/data-api-service/v1/"
-      + "10103/trailers/byCinemaId/%s?attr=&lang=en_GB").formatted(WROCLAVIA_ID);
-  private static final String BASE_URL = "https://www.cinema-city.pl/kina/wroclavia/%s?lang=en_GB"
-      .formatted(WROCLAVIA_ID);
+  private static final String CINEMA_CITY_SERVICE_API = "https://www.cinema-city.pl/pl/data-api-service/v1/10103";
+  private static final String MOVIE_LIST = CINEMA_CITY_SERVICE_API.concat("/trailers/byCinemaId/%s?attr=&lang=en_GB").formatted(WROCLAVIA_ID);
+  private static final String MOVIE_BY_ID_URL = CINEMA_CITY_SERVICE_API.concat("/films/byDistributorCode/%s?lang=en_GB");
+  private static final String WEBSITE_URL = "https://www.cinema-city.pl/kina/wroclavia/%s?lang=en_GB".formatted(WROCLAVIA_ID);
   private static final String RESPONSE_FORMAT =
       """
       🎬🟠 %d new movies found in 'Cinema City Wroclavia':
@@ -39,14 +42,23 @@ public class CinemaCityTask implements ReportingTask {
     Collection<CinemaCityItem> items = ObjectJsonMappingHelper.readObjectsFromJson(
         response, CinemaCityItem.class);
 
-    Collection<CinemaCityItem> newItems = excludePreviousItems(items);
+    List<CinemaCityItem> newItems = excludePreviousItems(items).stream()
+        .map(this::buildMovieItem)
+        .filter(this::filterByLanguage)
+        .toList();
+
     reportingCondition = () -> !newItems.isEmpty();
 
     String moviesResponse = newItems.stream()
         .map(CinemaCityItem::buildDisplayString)
         .reduce((a, b) -> a + "\n\n" + b)
         .orElse("---");
-    return RESPONSE_FORMAT.formatted(items.size(), moviesResponse, BASE_URL);
+    return RESPONSE_FORMAT.formatted(newItems.size(), moviesResponse, WEBSITE_URL);
+  }
+
+  private boolean filterByLanguage(CinemaCityItem cinemaCityItem) {
+    return cinemaCityItem.getDubbingLanguages().stream().anyMatch(LANGUAGES_TO_INCLUDE::contains)
+        || cinemaCityItem.getOriginalLanguages().stream().anyMatch(LANGUAGES_TO_INCLUDE::contains);
   }
 
   private Collection<CinemaCityItem> excludePreviousItems(Collection<CinemaCityItem> items) {
@@ -60,5 +72,13 @@ public class CinemaCityTask implements ReportingTask {
     ObjectFileMappingHelper.writeObjectsToFile(items.stream().toList(), PREVIOUS_ITEMS_FILE);
 
     return newItems;
+  }
+
+  private CinemaCityItem buildMovieItem(CinemaCityItem initialItem) {
+    String url = MOVIE_BY_ID_URL.formatted(initialItem.getId());
+    String response = HttpClientHelper.doGet(url);
+    String movieDetails = ObjectJsonMappingHelper
+        .readStringFromJson(response, "/body/filmDetails");
+    return ObjectJsonMappingHelper.readObjectFromJson(movieDetails, CinemaCityItem.class);
   }
 }

@@ -1,5 +1,6 @@
 package yehor.myinbox.jobs.kinonowe;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -22,18 +23,18 @@ public class KinoNoweItem {
 
   private String title;
   private String director;
-  private String link;
+  private List<String> links;
   private boolean isScreeningAvailable;
   private List<String> labels;
 
   public KinoNoweItem() {
   }
 
-  public KinoNoweItem(String title, String director, String link,
+  public KinoNoweItem(String title, String director, List<String> links,
       boolean isScreeningAvailable, List<String> labels) {
     this.title = title;
     this.director = director;
-    this.link = link;
+    this.links = links;
     this.isScreeningAvailable = isScreeningAvailable;
     this.labels = labels;
   }
@@ -49,17 +50,12 @@ public class KinoNoweItem {
         .map(el -> el.attr(LABEL_ATTR))
         .toList();
 
-    return new KinoNoweItem(movieTitle, movieDirector, movieLink, isScreeningAvailable, labels);
+    return new KinoNoweItem(
+        movieTitle, movieDirector, List.of(movieLink), isScreeningAvailable, labels);
   }
 
   public String buildDisplayString(String baseLink) {
-    String directorToDisplay = (Objects.nonNull(director) && !director.isBlank())
-        ? ", dir. %s".formatted(director)
-        : "";
-    return "- %s%s (<a href=\"%s\">link</a>)".formatted(
-        title,
-        directorToDisplay,
-        baseLink.concat(link));
+    return "- %s%s (%s)".formatted(title, directorForDisplay(), linksForDisplay(baseLink));
   }
 
   public KinoNoweItem replaceTitle(Function<String, String> titleReplacer) {
@@ -69,6 +65,13 @@ public class KinoNoweItem {
 
   public boolean hasSkipLabel() {
     return labels.stream().anyMatch(SKIP_LABELS::contains);
+  }
+
+  public KinoNoweItem merge(KinoNoweItem other) {
+    List<String> mergedLinks = new ArrayList<>(this.links);
+    mergedLinks.addAll(other.links);
+    setLinks(mergedLinks);
+    return this;
   }
 
   @Override
@@ -101,12 +104,12 @@ public class KinoNoweItem {
     this.director = director;
   }
 
-  public String getLink() {
-    return link;
+  public List<String> getLinks() {
+    return links;
   }
 
-  public void setLink(String link) {
-    this.link = link;
+  public void setLinks(List<String> links) {
+    this.links = links;
   }
 
   public boolean isScreeningAvailable() {
@@ -124,4 +127,18 @@ public class KinoNoweItem {
   public void setLabels(List<String> labels) {
     this.labels = labels;
   }
+
+  private String directorForDisplay() {
+    return (Objects.nonNull(director) && !director.isBlank())
+        ? ", dir. %s".formatted(director)
+        : "";
+  }
+
+  private String linksForDisplay(String baseLink) {
+    return links.stream()
+        .map(l -> "<a href=\"%s\">link</a>".formatted(baseLink.concat(l)))
+        .reduce((a, b) -> a + ", " + b)
+        .orElse("");
+  }
+
 }

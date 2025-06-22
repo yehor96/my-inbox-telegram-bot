@@ -3,7 +3,7 @@ package yehor.myinbox.jobs.kinonowe;
 import static yehor.myinbox.jobs.kinonowe.KinoNoweItem.MAIN_ELEMENT_SELECTOR;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import yehor.myinbox.helpers.HttpClientHelper;
@@ -44,11 +44,12 @@ public class KinoNoweTask implements ReportingTask {
   public String run() {
     String response = HttpClientHelper.doGet(MOVIE_LIST_URL);
 
-    Set<KinoNoweItem> items = Jsoup.parse(response)
+    Collection<KinoNoweItem> items = Jsoup.parse(response)
         .select(MAIN_ELEMENT_SELECTOR).stream()
         .map(KinoNoweItem::fromElement)
         .filter(item -> !item.hasSkipLabel() && item.isScreeningAvailable())
-        .collect(Collectors.toSet());
+        .collect(Collectors.toMap(KinoNoweItem::getTitle, Function.identity(), KinoNoweItem::merge))
+        .values();
 
     Collection<KinoNoweItem> newItems = excludePreviousItems(items);
     reportingCondition = () -> !newItems.isEmpty();

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class ObjectFileHelper {
+public class ObjectFileMappingHelper {
 
   private static final ObjectMapper MAPPER;
 
@@ -37,7 +37,7 @@ public class ObjectFileHelper {
     CollectionType type = MAPPER.getTypeFactory().constructCollectionType(List.class, klass);
     try {
       return MAPPER.readValue(file, type);
-    } catch (IOException e) {
+    } catch (Exception e) {
       System.out.println("Unable to read objects from file: " + fileName);
       return Collections.emptyList();
     }

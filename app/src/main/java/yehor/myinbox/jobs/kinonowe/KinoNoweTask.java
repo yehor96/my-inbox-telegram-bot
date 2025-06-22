@@ -1,13 +1,13 @@
 package yehor.myinbox.jobs.kinonowe;
 
-import static java.util.stream.Collectors.toCollection;
 import static yehor.myinbox.jobs.kinonowe.KinoNoweItem.MAIN_ELEMENT_SELECTOR;
 
-import java.util.LinkedHashSet;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
 import yehor.myinbox.helpers.HttpClientHelper;
-import yehor.myinbox.helpers.ObjectFileHelper;
+import yehor.myinbox.helpers.ObjectFileMappingHelper;
 import yehor.myinbox.jobs.ReportingCondition;
 import yehor.myinbox.jobs.ReportingTask;
 import yehor.myinbox.translation.ExternalTranslatorService;
@@ -48,14 +48,14 @@ public class KinoNoweTask implements ReportingTask {
         .select(MAIN_ELEMENT_SELECTOR).stream()
         .map(KinoNoweItem::fromElement)
         .filter(item -> !item.hasSkipLabel() && item.isScreeningAvailable())
-        .collect(toCollection(LinkedHashSet::new));
+        .collect(Collectors.toSet());
 
-    Set<KinoNoweItem> newItems = excludePreviousItems(items);
+    Collection<KinoNoweItem> newItems = excludePreviousItems(items);
     reportingCondition = () -> !newItems.isEmpty();
 
-    Set<KinoNoweItem> translatedItems = newItems.stream()
+    Collection<KinoNoweItem> translatedItems = newItems.stream()
         .map(item -> item.replaceTitle(translatorService::translate))
-        .collect(toCollection(LinkedHashSet::new));
+        .toList();
 
     logTranslationBilling();
     return buildResponse(translatedItems);
@@ -68,20 +68,20 @@ public class KinoNoweTask implements ReportingTask {
     }
   }
 
-  private Set<KinoNoweItem> excludePreviousItems(Set<KinoNoweItem> items) {
-    final Set<KinoNoweItem> previousItems = new LinkedHashSet<>(
-        ObjectFileHelper.readObjectsFromFile(PREVIOUS_ITEMS_FILE, KinoNoweItem.class));
+  private Collection<KinoNoweItem> excludePreviousItems(Collection<KinoNoweItem> items) {
+    final Collection<KinoNoweItem> previousItems =
+        ObjectFileMappingHelper.readObjectsFromFile(PREVIOUS_ITEMS_FILE, KinoNoweItem.class);
 
-    Set<KinoNoweItem> newItems = items.stream()
+    Collection<KinoNoweItem> newItems = items.stream()
         .filter(item -> !previousItems.contains(item))
-        .collect(toCollection(LinkedHashSet::new));
+        .toList();
 
-    ObjectFileHelper.writeObjectsToFile(items.stream().toList(), PREVIOUS_ITEMS_FILE);
+    ObjectFileMappingHelper.writeObjectsToFile(items.stream().toList(), PREVIOUS_ITEMS_FILE);
 
     return newItems;
   }
 
-  private String buildResponse(Set<KinoNoweItem> items) {
+  private String buildResponse(Collection<KinoNoweItem> items) {
     String moviesResponse = items.stream()
         .map(item -> item.buildDisplayString(BASE_URL))
         .reduce((a, b) -> a + "\n\n" + b)

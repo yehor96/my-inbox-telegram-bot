@@ -15,6 +15,7 @@ public class CinemaCityTask implements ReportingTask {
   private static final String PREVIOUS_ITEMS_FILE = "data/cinema_city_previous_items.json";
   private static final String WROCLAVIA_ID = "1097";
   private static final String CINEMA_CITY_SERVICE_API = "https://www.cinema-city.pl/pl/data-api-service/v1/10103";
+  private static final String WROCLAW_CINEMA_URL_SUFFIX = "#/buy-tickets-by-film?in-cinema=wroclaw";
   private static final String MOVIE_LIST = CINEMA_CITY_SERVICE_API.concat("/trailers/byCinemaId/%s?attr=&lang=en_GB").formatted(WROCLAVIA_ID);
   private static final String MOVIE_BY_ID_URL = CINEMA_CITY_SERVICE_API.concat("/films/byDistributorCode/%s?lang=en_GB");
   private static final String WEBSITE_URL = "https://www.cinema-city.pl/kina/wroclavia/%s?lang=en_GB".formatted(WROCLAVIA_ID);
@@ -50,7 +51,7 @@ public class CinemaCityTask implements ReportingTask {
     reportingCondition = () -> !newItems.isEmpty();
 
     String moviesResponse = newItems.stream()
-        .map(CinemaCityItem::buildDisplayString)
+        .map(item -> item.buildDisplayString(WROCLAW_CINEMA_URL_SUFFIX))
         .reduce((a, b) -> a + "\n\n" + b)
         .orElse("---");
     return RESPONSE_FORMAT.formatted(newItems.size(), moviesResponse, WEBSITE_URL);

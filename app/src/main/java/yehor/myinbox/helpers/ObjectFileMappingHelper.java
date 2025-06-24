@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ObjectFileMappingHelper {
@@ -30,8 +31,8 @@ public class ObjectFileMappingHelper {
   public static <T> Collection<T> readObjectsFromFile(String fileName, Class<T> klass) {
     File file = new File(fileName);
     if (!file.exists()) {
-      String error = "File not found: " + fileName;
-      throw new RuntimeException(error);
+      System.out.println("File not found: " + fileName + ". Returning empty list.");
+      return Collections.emptyList();
     }
 
     CollectionType type = MAPPER.getTypeFactory().constructCollectionType(List.class, klass);

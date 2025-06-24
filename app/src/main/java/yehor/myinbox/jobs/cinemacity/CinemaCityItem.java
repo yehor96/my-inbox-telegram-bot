@@ -39,8 +39,10 @@ public class CinemaCityItem {
     this.originalLanguages = originalLanguages;
   }
 
-  public String buildDisplayString() {
-    return "- %s, dir. %s (<a href=\"%s\">link</a>)".formatted(titleForDisplay(), director, link);
+  public String buildDisplayString(String cinemaUrlSuffix) {
+    String linkForDisplay = link.concat(cinemaUrlSuffix);
+    return "- %s, dir. %s (<a href=\"%s\">link</a>)".formatted(
+        titleForDisplay(), director, linkForDisplay);
   }
 
   public String titleForDisplay() {

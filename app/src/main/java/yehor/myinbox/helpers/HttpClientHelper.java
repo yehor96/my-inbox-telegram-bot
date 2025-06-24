@@ -17,7 +17,8 @@ public class HttpClientHelper {
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       if (response.statusCode() != 200) {
-        throw new RuntimeException("Failed to fetch data: " + response.statusCode());
+        throw new RuntimeException(String.format("Failed to doGet data from url %s. Status code %d",
+            url, response.statusCode()));
       }
 
       return response.body();

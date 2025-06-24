@@ -7,8 +7,21 @@ public abstract class ReportingJob implements Job {
 
   @Override
   public void execute(JobExecutionContext context) {
+    String result;
     try {
-      String result = task().run();
+      result = task().run();
+    } catch (Exception e) {
+      String error = String.format("Error executing task for %s. %s",
+          task().getClass().getSimpleName(), e.getMessage());
+      System.out.println(error);
+      reporter().sendFailure(error);
+      return;
+    }
+    handleSuccessfulReporting(result);
+  }
+
+  private void handleSuccessfulReporting(String result) {
+    try {
       if (task().reportingCondition().isMet()) {
         System.out.printf("Sending report for %s\n", task().getClass().getSimpleName());
         reporter().sendReport(result);
@@ -17,7 +30,7 @@ public abstract class ReportingJob implements Job {
             task().getClass().getSimpleName());
       }
     } catch (Exception e) {
-      System.out.println("Error executing ReportingJob: " + e.getMessage());
+      System.out.println("Error reporting a task: " + e.getMessage());
     }
   }
 

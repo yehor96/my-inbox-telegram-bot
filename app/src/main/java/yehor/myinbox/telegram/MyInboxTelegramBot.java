@@ -26,7 +26,7 @@ public class MyInboxTelegramBot extends TelegramLongPollingBot {
     try {
       execute(message);
     } catch (TelegramApiException e) {
-      System.out.println("Something went wrong: " + e.getMessage());
+      System.out.println("Failed to send message to Telegram bot: " + e.getMessage());
     }
   }
 

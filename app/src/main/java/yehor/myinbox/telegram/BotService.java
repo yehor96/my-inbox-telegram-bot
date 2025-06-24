@@ -22,4 +22,9 @@ public class BotService implements Reporter {
   public void sendReport(String report) {
     myInboxTelegramBot.sendMessage(report);
   }
+
+  @Override
+  public void sendFailure(String errorMessage) {
+    myInboxTelegramBot.sendMessage("\uD83D\uDFE5 ".concat(errorMessage));
+  }
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.type.CollectionType;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ObjectFileMappingHelper {
@@ -23,23 +22,24 @@ public class ObjectFileMappingHelper {
     try {
       MAPPER.writeValue(file, objects);
     } catch (IOException e) {
-      System.out.println("Unable to write objects to file: " + fileName + " - " + e.getMessage());
+      String error = "Unable to write objects to file: " + fileName + " - " + e.getMessage();
+      throw new RuntimeException(error);
     }
   }
 
   public static <T> Collection<T> readObjectsFromFile(String fileName, Class<T> klass) {
     File file = new File(fileName);
     if (!file.exists()) {
-      System.out.println("File not found: " + fileName + ". Returning empty list.");
-      return Collections.emptyList();
+      String error = "File not found: " + fileName;
+      throw new RuntimeException(error);
     }
 
     CollectionType type = MAPPER.getTypeFactory().constructCollectionType(List.class, klass);
     try {
       return MAPPER.readValue(file, type);
     } catch (Exception e) {
-      System.out.println("Unable to read objects from file: " + fileName + " - " + e.getMessage());
-      return Collections.emptyList();
+      String error = "Unable to read objects from file: " + fileName + " - " + e.getMessage();
+      throw new RuntimeException(error);
     }
   }
 }

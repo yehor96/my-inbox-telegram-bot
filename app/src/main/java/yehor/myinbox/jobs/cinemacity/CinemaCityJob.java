@@ -1,5 +1,6 @@
 package yehor.myinbox.jobs.cinemacity;
 
+import yehor.myinbox.helpers.EnvVarHelper;
 import yehor.myinbox.jobs.Reporter;
 import yehor.myinbox.jobs.ReportingJob;
 import yehor.myinbox.jobs.ReportingTask;
@@ -16,7 +17,9 @@ public class CinemaCityJob extends ReportingJob {
 
   @Override
   public String schedule() {
-    return "0 0 19 * * ?"; // Every day at 7 pm
+    return EnvVarHelper.IS_LOCAL_ENV ?
+        "0 * * * * ?" : // Every minute
+        "0 0 19 * * ?"; // Every day at 7 pm
   }
 
   @Override
